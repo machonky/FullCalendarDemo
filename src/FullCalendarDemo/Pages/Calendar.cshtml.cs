@@ -35,7 +35,7 @@ namespace FullCalendarDemo.Pages
             {
                 id = bd.Id,
                 title = "Business Day",
-                start = new DateTime(bd.Id / 10000, (bd.Id / 100) % 100, bd.Id % 100).ToString("yyyy-MM-dd"),
+                start = bd.Id.FromDateIndex().ToString("yyyy-MM-dd"),
                 allDay = true
             });
 
@@ -45,26 +45,34 @@ namespace FullCalendarDemo.Pages
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostSelectedEvents([FromBody] SelectedEventsData data)
         {
-            var startDate = data.StartDate;
-            var endDate = data.EndDate;
+            var startDate = data.StartDate.ToDateTime(new TimeOnly());
+            var endDate = data.EndDate.ToDateTime(new TimeOnly());
+            var startDateIndex = startDate.DateTimeToDateIndex();
+            var endDateIndex = endDate.DateTimeToDateIndex();
 
-            // Iterate over the date range and create BusinessDay entities
-            for (var date = startDate; date < endDate; date = date.AddDays(1))
+            var businessDayIndices = await _context.BusinessDays
+                .Where(bd => bd.Id >= startDateIndex && bd.Id <= endDateIndex)
+                .ToListAsync();
+
+            var selectedDates = Enumerable.Range(0, (endDate - startDate).Days)
+                .Select(offset => startDate.AddDays(offset))
+                .ToList();
+
+            foreach(var date in selectedDates)
             {
-                int businessDayId = int.Parse(date.ToString("yyyyMMdd"));
-
-                // Check if the business day already exists in the database
-                bool businessDayExists = await _context.BusinessDays.AnyAsync(bd => bd.Id == businessDayId);
-
-                if (!businessDayExists)
+                var businessDayId = date.DateTimeToDateIndex();
+                var existingBusinessDay = businessDayIndices.FirstOrDefault(bd => bd.Id == businessDayId);
+                if (existingBusinessDay != null) 
                 {
-                    // Create a new BusinessDay entity and add it to the database
-                    var businessDay = new BusinessDay
+                    _context.BusinessDays.Remove(existingBusinessDay);
+                }
+                else
+                {
+                    var newBusinessDay = new BusinessDay
                     {
                         Id = businessDayId
                     };
-
-                    _context.BusinessDays.Add(businessDay);
+                    _context.BusinessDays.Add(newBusinessDay);
                 }
             }
 
