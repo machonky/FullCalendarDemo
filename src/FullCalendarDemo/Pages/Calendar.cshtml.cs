@@ -45,11 +45,11 @@ namespace FullCalendarDemo.Pages
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostSelectedEvents([FromBody] SelectedEventsData data)
         {
-            DateTime startDate = data.StartDate.Date;
-            DateTime endDate = data.EndDate.Date;
+            var startDate = data.StartDate;
+            var endDate = data.EndDate;
 
             // Iterate over the date range and create BusinessDay entities
-            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            for (var date = startDate; date < endDate; date = date.AddDays(1))
             {
                 int businessDayId = int.Parse(date.ToString("yyyyMMdd"));
 
@@ -76,8 +76,8 @@ namespace FullCalendarDemo.Pages
 
         public class SelectedEventsData
         {
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public DateOnly StartDate { get; set; }
+            public DateOnly EndDate { get; set; }
         }
     }
 }

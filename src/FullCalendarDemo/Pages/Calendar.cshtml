@@ -6,12 +6,16 @@
 }
 
 <h1>Calendar</h1>
+
+<div id='calendar'></div>
+
 <script>
 
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
+            initialView: 'multiMonthYear',
+            multiMonthMaxColumns: 2,
             editable: true,
             selectable: true,
             events: '/Calendar?handler=BusinessDays',
@@ -48,23 +52,5 @@
 
 </script>
 
-<div id='calendar'></div>
-
 @Html.AntiForgeryToken()
 
-@* <table class="table">
-    <thead>
-        <tr>
-            <th scope="col">Day Of Week</th>
-            <th scope="col">Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.BusinessDayModels) {
-            <tr>
-                <td>@item.DayOfWeek</td>
-                <td>@item.Date.ToString("yyyy-MM-dd")</td>
-            </tr>
-        }
-    </tbody>
-</table> *@
