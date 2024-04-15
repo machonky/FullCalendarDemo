@@ -27,7 +27,7 @@
 
                 // Make an AJAX request to the Razor Page endpoint
                 fetch('/Calendar?handler=SelectedEvents', {
-                    method: 'POST',
+                    method: 'post',
                     headers: {
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': token // Include the anti-forgery token in the headers
