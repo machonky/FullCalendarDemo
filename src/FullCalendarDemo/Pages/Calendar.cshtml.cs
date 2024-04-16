@@ -21,22 +21,22 @@ namespace FullCalendarDemo.Pages
             _logger = logger;
         }
 
-        public IList<BusinessDay> BusinessDays { get;set; } = default!;
-
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetBusinessDays(DateTime start, DateTime end)
         {
-            //BusinessDays = await _context.BusinessDays.ToListAsync();
-        }
+            _logger.LogInformation($"Getting Business Days from {start.ToString("yyyy-MM-dd")} to {end.ToString("yyyy-MM-dd")}");
 
-        public async Task<IActionResult> OnGetBusinessDays()
-        {
-            var businessDays = await _context.BusinessDays.ToListAsync();
-            var calendarModels = businessDays.Select(bd => new
+            var startDate = start.Date.DateTimeToDateIndex();
+            var endDate = end.Date.DateTimeToDateIndex();
+
+            var businessDays = await _context.BusinessDays
+                .Where(bd => bd.Id >= startDate && bd.Id <= endDate)
+                .ToListAsync();
+
+            var calendarModels = businessDays.Select(bd => new FullCalendarEventModel
             {
-                id = bd.Id,
+                id = bd.Id.ToString(),
                 title = "Business Day",
-                start = bd.Id.FromDateIndex().ToString("yyyy-MM-dd"),
-                allDay = true
+                start = bd.Id.FromDateIndex().ToString("yyyy-MM-dd")
             });
 
             return new JsonResult(calendarModels);
@@ -86,6 +86,14 @@ namespace FullCalendarDemo.Pages
         {
             public DateOnly StartDate { get; set; }
             public DateOnly EndDate { get; set; }
+        }
+
+        public class FullCalendarEventModel
+        {
+            public string id { get; set; }
+            public string title { get; set; }
+            public string start { get; set; }
+            public bool allDay { get; set; } = true;
         }
     }
 }

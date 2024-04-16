@@ -16,13 +16,28 @@
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             //initialView: 'multiMonthYear',
-            editable: false,
-            selectable: true,
-            events: '/Calendar?handler=BusinessDays',
-            select: selectCallback
+            editable: false, // Don't allow to modify events on the UI
+            selectable: true, // Allow multiple selection of dates
+            events: requestEventsAjax,
+            select: selectAjaxCallback
         });
 
-        function selectCallback(info) {
+        function requestEventsAjax(fetchInfo, successCallback, failureCallback) {
+            // Get the start and end dates of the visible date range
+            var startDate = fetchInfo.start.toISOString();
+            var endDate = fetchInfo.end.toISOString();
+
+            fetch(`/Calendar?handler=BusinessDays&start=${startDate}&end=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    successCallback(data);
+                })
+                .catch(error => {
+                    failureCallback(error);
+                });
+        };
+
+        function selectAjaxCallback(info) {
             var startDate = info.startStr;
             var endDate = info.endStr;
 
@@ -51,8 +66,6 @@
 
         calendar.render();
     });
-
-
 
 </script>
 
