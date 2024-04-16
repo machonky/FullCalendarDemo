@@ -1,6 +1,10 @@
 ﻿@page
+@using Microsoft.AspNetCore.Antiforgery
 @model FullCalendarDemo.Pages.CalendarModel
-
+@inject IAntiforgery antiforgery
+@{
+    var token = antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
+}
 @{
     ViewData["Title"] = "Business Days Calendar";
 }
@@ -46,13 +50,11 @@
             var startDate = info.startStr;
             var endDate = info.endStr;
 
-            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
             fetch('/Calendar?handler=SelectedEvents', {
                 method: 'post',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': token
+                    'RequestVerificationToken': '@token'
                 },
                 body: JSON.stringify({ startDate: startDate, endDate: endDate })
             })
@@ -74,5 +76,4 @@
 
 </script>
 
-@Html.AntiForgeryToken()
 
