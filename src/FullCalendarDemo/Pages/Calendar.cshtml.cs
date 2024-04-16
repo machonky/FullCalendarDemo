@@ -42,7 +42,6 @@ namespace FullCalendarDemo.Pages
             return new JsonResult(calendarModels);
         }
 
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostSelectedEvents([FromBody] SelectedEventsData data)
         {
             var startDate = data.StartDate.ToDateTime(new TimeOnly());
