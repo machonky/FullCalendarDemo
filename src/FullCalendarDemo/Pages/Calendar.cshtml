@@ -19,36 +19,40 @@
             editable: false,
             selectable: true,
             events: '/Calendar?handler=BusinessDays',
-            select: function (info) {
-                var startDate = info.startStr;
-                var endDate = info.endStr;
-
-                var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-                // Make an AJAX request to the Razor Page endpoint
-                fetch('/Calendar?handler=SelectedEvents', {
-                    method: 'post',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': token // Include the anti-forgery token in the headers
-                    },
-                    body: JSON.stringify({ startDate: startDate, endDate: endDate })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Refetch the events and rerender the calendar
-                            calendar.refetchEvents();
-                        }
-                    })
-                    .catch(error => {
-                        // Handle any errors
-                        console.error('Error:', error);
-                    });
-            }
+            select: selectCallback
         });
+
+        function selectCallback(info) {
+            var startDate = info.startStr;
+            var endDate = info.endStr;
+
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/Calendar?handler=SelectedEvents', {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ startDate: startDate, endDate: endDate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refetch the events and rerender the calendar
+                    calendar.refetchEvents();
+                }
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });
+        };
+
         calendar.render();
     });
+
+
 
 </script>
 
